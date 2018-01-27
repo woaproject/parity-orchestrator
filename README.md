@@ -37,7 +37,7 @@ topic = "0x...."
 By default, Orchestrator will announce the node every 30 seconds, and this can be configured as well:
 
 ```toml
-node_announcement_frequency = <number of seconds>
+node_announcement_frequency = 60
 ```
 
 By default, Orchestrator will try to figure out node's public IP using http://checkip.amazonaws.com, however,
