@@ -56,3 +56,9 @@ party_node = "http://host:8545"
 ```
 
 By default, Orchestrator will try to find parity-orchestrator.toml, but this can be changed with a `-c/--config` argument.
+
+## Notes
+
+In some cases, it is useful to see if Parity Orchestrator is doing anything. It's typically logging
+"Polling announcements" into a trace log, which is normally disabled. For that reason, there's `reveal_trace_every_secs`
+configuration parameter. It will show this log statement every 10 seconds by default. Setting it to 0 will disable it.

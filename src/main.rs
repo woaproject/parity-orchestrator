@@ -155,6 +155,8 @@ struct Config {
     node_announcement_frequency: u16,
     #[serde(default = "default_parity_node")]
     parity_node: String,
+    #[serde(default = "default_reveal_trace_every_secs")]
+    reveal_trace_every_secs: u64,
 }
 
 fn default_parity_node() -> String {
@@ -163,6 +165,10 @@ fn default_parity_node() -> String {
 
 fn default_announcement_frequency() -> u16 {
     30
+}
+
+fn default_reveal_trace_every_secs() -> u64 {
+    10
 }
 
 use std::time::{Duration, Instant};
@@ -286,11 +292,20 @@ fn main() {
     let mut last_announcement = Instant::now();
     let node_announcement_frequency = Duration::from_secs(config.node_announcement_frequency as u64);
 
+    let mut reveal_instant = Instant::now();
     loop {
         ::std::thread::sleep(Duration::from_secs(1));
-        trace!(log, "Polling announcements");
+        if config.reveal_trace_every_secs > 0 && reveal_instant.elapsed().as_secs() >= config.reveal_trace_every_secs {
+            reveal_instant = Instant::now();
+            info!(log, "Polling announcements (reveal_trace_every_secs = {})", config.reveal_trace_every_secs);
+        } else {
+            trace!(log, "Polling announcements");
+        }
         let messages = client.shh_getFilterMessages(filter.clone()).call().expect("failed to poll announcements");
-        trace!(log, "Got {} message(s)", messages.len());
+
+        if messages.len() > 0 {
+            info!(log, "Got {} message(s)", messages.len());
+        }
 
         for message in messages {
             let payload = message.payload;
