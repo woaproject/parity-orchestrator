@@ -62,3 +62,6 @@ By default, Orchestrator will try to find parity-orchestrator.toml, but this can
 In some cases, it is useful to see if Parity Orchestrator is doing anything. It's typically logging
 "Polling announcements" into a trace log, which is normally disabled. For that reason, there's `reveal_trace_every_secs`
 configuration parameter. It will show this log statement every 10 seconds by default. Setting it to 0 will disable it.
+
+Orchestrator also keeps a log of enodes it added (format: "iso8601 enode" lines), configured with
+`orchestrator_additions_file` configuration parameter ("parity-orchestrator-nodes" by default)

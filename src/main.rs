@@ -21,6 +21,8 @@ extern crate config;
 extern crate byteorder;
 #[macro_use] extern crate arrayref;
 
+extern crate chrono;
+
 mod myip;
 mod as_hex;
 
@@ -157,6 +159,8 @@ struct Config {
     parity_node: String,
     #[serde(default = "default_reveal_trace_every_secs")]
     reveal_trace_every_secs: u64,
+    #[serde(default = "default_orchestrator_additions_file")]
+    orchestrator_additions_file: String,
 }
 
 fn default_parity_node() -> String {
@@ -171,7 +175,12 @@ fn default_reveal_trace_every_secs() -> u64 {
     10
 }
 
+fn default_orchestrator_additions_file() -> String {
+    "parity-orchestrator-nodes".into()
+}
+
 use std::time::{Duration, Instant};
+use std::fs;
 
 fn main() {
     use slog::Drain;
@@ -223,6 +232,10 @@ fn main() {
     };
 
     info!(log, "Parity Orchestrator started");
+
+    // prepare additions file so it can be monitored from the very beginning
+    let mut f = fs::OpenOptions::new().create(true).append(true).open(&config.orchestrator_additions_file).expect("can't open additions file");
+    drop(f);
 
     let transport = HttpTransport::new().unwrap();
     let transport_handle = transport.handle(config.parity_node.as_str()).unwrap();
@@ -346,10 +359,14 @@ fn main() {
                         let (ip, port) = address.unwrap();
                         let enode = format!("enode://{}@{}:{}", peer_id, ip, port);
                         info!(log, "Adding new peer: {}", enode);
-                        let res = client.parity_addReservedPeer(enode).call();
+                        let res = client.parity_addReservedPeer(enode.clone()).call();
                         if res.is_err() {
                             error!(log, "Can't add new peer: {}", res.unwrap_err());
                         } else {
+                            use std::fs;
+                            use chrono::prelude::*;
+                            let mut f = fs::OpenOptions::new().create(true).append(true).open(&config.orchestrator_additions_file).expect("can't open additions file");
+                            f.write(format!("{} {}\n", Utc::now().to_rfc3339(),enode).as_bytes()).expect("can't write to the additions file");
                             if !res.unwrap() {
                                 error!(log, "Parity refused adding this new peer");
                             }
