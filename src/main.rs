@@ -241,7 +241,17 @@ fn main() {
     let transport_handle = transport.handle(config.parity_node.as_str()).unwrap();
     let mut client = ParityClient::new(transport_handle);
 
-    let enode: String = client.parity_enode().call().expect("can't fetch enode");
+    let enode = loop {
+        match client.parity_enode().call() {
+            Ok(result) => {
+                break result;
+            },
+            Err(_) => {
+                ::std::thread::sleep(Duration::from_secs(1));
+                info!(log, "Waiting for Parity to become available");
+            }
+        }
+    };
     info!(log, "Connected to enode {}", enode);
     let node_id = urlparse(enode).username.expect("cna't fetch node id");
     info!(log, "Node ID: {}", node_id);
@@ -255,16 +265,21 @@ fn main() {
     let port = client.parity_netPort().call().expect("can't fetch port Parity is listening on");
     info!(log, "Listening on port: {}", port);
 
-    let callback = ::std::net::TcpStream::connect_timeout(&::std::net::SocketAddr::new(ip, port), Duration::from_secs(10));
+    let callback = loop {
+        let cb = ::std::net::TcpStream::connect_timeout(&::std::net::SocketAddr::new(ip, port), Duration::from_secs(10));
 
-    match callback {
-        Ok(_) => info!(log, "Callback to {}:{} has been successful", ip, port),
-        Err(err) => {
-            error!(log, "Callback to {}:{} has been unsuccessful, aborting: {:?}", ip, port, err);
-            drop(log);
-            ::std::process::exit(1);
+        match cb {
+            Ok(_) => {
+                info!(log, "Callback to {}:{} has been successful", ip, port);
+                break cb;
+            },
+            Err(err) => {
+                error!(log, "Callback to {}:{} has been unsuccessful: {:?}, waiting for it to become available", ip, port, err);
+                ::std::thread::sleep(Duration::from_secs(1));
+            }
         }
-    }
+
+    };
 
     // Subscribe to the announcement topic
     let announcement_topic: Vec<u8> = config.node_announcement_topic.clone().into();
