@@ -253,7 +253,7 @@ fn main() {
         }
     };
     info!(log, "Connected to enode {}", enode);
-    let node_id = urlparse(enode).username.expect("cna't fetch node id");
+    let node_id = urlparse(enode).username.expect("can't fetch node id");
     info!(log, "Node ID: {}", node_id);
     let node_id_bin: Vec<u8> = hex::decode(&node_id).expect("can't parse node id as a hexadecimal binary");
 
