@@ -1,4 +1,4 @@
-# Parity Orchestrator
+# Tetsy Orchestrator
 
 **NB**: This is a prototype, an updated version will be published soon, with a few
 more features, improved documentation and code.
