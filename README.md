@@ -3,8 +3,8 @@
 **NB**: This is a prototype, an updated version will be published soon, with a few
 more features, improved documentation and code.
 
-Parity Orchestrator enables greedy peering (and, potentially, other strategies)
-between Parity nodes. It operates as an external program and communicates
+Tetsy Orchestrator enables greedy peering (and, potentially, other strategies)
+between Tetsy nodes. It operates as an external program and communicates
 with its local parity node over JSON-RPC.
 
 Orchestrator announces its local node regularly and listens for other announcements
@@ -14,7 +14,7 @@ in greedy peering must run Orchestrator alongside.
 Currently, to be used, a [workaround version of Parity with Whisper issues fixed](https://github.com/poanetwork/parity/tree/disable-parity-whisper-extensions)
 needs to be used. That is, until it's fixed.
 
-A node to be managed by Orchestrator needs to enable `parity_set` JSON-RPC API and Whisper. The node's port should be available through
+A node to be managed by Orchestrator needs to enable `tetsy_set` JSON-RPC API and Whisper. The node's port should be available through
 the node's public IP. Orchestrator WILL try to "call back home" and will fail to start if this attempt will be unsuccessful.
 
 One has to provide a configuration for the node, such as:
@@ -52,10 +52,10 @@ ip = "..."
 It's also possible to specify different JSON-RPC endpoint (other than http://localhost:8545):
 
 ```toml
-party_node = "http://host:8545"
+tetsy_node = "http://host:8545"
 ```
 
-By default, Orchestrator will try to find parity-orchestrator.toml, but this can be changed with a `-c/--config` argument.
+By default, Orchestrator will try to find tetsy-orchestrator.toml, but this can be changed with a `-c/--config` argument.
 
 ## Notes
 
@@ -64,4 +64,4 @@ In some cases, it is useful to see if Parity Orchestrator is doing anything. It'
 configuration parameter. It will show this log statement every 10 seconds by default. Setting it to 0 will disable it.
 
 Orchestrator also keeps a log of enodes it added (format: "iso8601 enode" lines), configured with
-`orchestrator_additions_file` configuration parameter ("parity-orchestrator-nodes" by default)
+`orchestrator_additions_file` configuration parameter ("tetsy-orchestrator-nodes" by default)
